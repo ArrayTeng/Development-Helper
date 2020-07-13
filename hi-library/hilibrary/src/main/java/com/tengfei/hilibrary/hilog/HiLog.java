@@ -1,8 +1,9 @@
 package com.tengfei.hilibrary.hilog;
 
-import android.util.Log;
-
 import androidx.annotation.NonNull;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author 滕飞
@@ -63,13 +64,31 @@ public class HiLog {
 
 
     private static void log(@HiLogType.LogType int type, String tag, Object... content) {
-        HiLogConfig hiLogConfig = HiLogManager.instance().getHiLogConfig();
+        HiLogConfig hiLogConfig = HiLogManager.getInstance().getHiLogConfig();
         if (!hiLogConfig.enable()) {
             return;
         }
         String logTag = tag == null ? hiLogConfig.global() : tag;
+
+        StringBuilder builder = new StringBuilder();
+        if (hiLogConfig.includeThread()) {
+            String threadInfo = HiLogConfig.HI_THREAD_FORMAT.format(Thread.currentThread());
+            builder.append(threadInfo).append("\n");
+        }
+        if (hiLogConfig.stackTraceDepth() > 0) {
+            String stackTraceInfo = HiLogConfig.HI_STACK_TRACE_FORMAT.format(new Throwable().getStackTrace());
+            builder.append(stackTraceInfo).append("\n");
+        }
         String body = parseBody(content);
-        Log.println(type, logTag, body);
+        builder.append(body);
+        List<HiLogPrinter> printers = hiLogConfig.hiLogPrinters() != null ? Arrays.asList(hiLogConfig.hiLogPrinters()) :
+                HiLogManager.getInstance().getHiLogPrinters();
+        if (printers == null) {
+            return;
+        }
+        for (HiLogPrinter printer : printers) {
+            printer.print(hiLogConfig, type, logTag, builder.toString());
+        }
     }
 
     private static String parseBody(@NonNull Object[] content) {
