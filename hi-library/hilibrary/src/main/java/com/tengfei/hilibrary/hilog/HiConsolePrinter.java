@@ -12,7 +12,7 @@ import static com.tengfei.hilibrary.hilog.HiLogConfig.MAX_LEN;
  * email arrayadapter.cn@outlook.com
  * description 控制台打印
  */
-class HiConsolePrinter implements HiLogPrinter {
+public class HiConsolePrinter implements HiLogPrinter {
     @Override
     public void print(@NonNull HiLogConfig hiLogConfig, int level, String tag, @NonNull String printString) {
         int len = printString.length();
@@ -23,11 +23,13 @@ class HiConsolePrinter implements HiLogPrinter {
             int index = 0;
             for (int i = 0; i < count; i++) {
                 Log.println(level, tag, printString.substring(index, index + MAX_LEN));
-                index = index+MAX_LEN;
+                index = index + MAX_LEN;
             }
-            if (index!=len){
+            if (index != len) {
                 Log.println(level, tag, printString.substring(index, len));
             }
+        } else {
+            Log.println(level, tag, printString);
         }
     }
 }

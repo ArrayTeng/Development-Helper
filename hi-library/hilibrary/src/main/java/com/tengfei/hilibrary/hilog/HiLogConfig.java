@@ -21,7 +21,7 @@ public abstract class HiLogConfig {
         return 5;
     }
 
-    public JsonParse injectJson(JsonParse jsonParse){
+    public JsonParse injectJson(){
         return null;
     }
 

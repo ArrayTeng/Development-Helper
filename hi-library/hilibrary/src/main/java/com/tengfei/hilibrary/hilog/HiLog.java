@@ -13,6 +13,8 @@ import java.util.List;
  */
 public class HiLog {
 
+    private static final String packageName = HiLog.class.getPackage().getName();
+
     public static void v(Object... content) {
 
     }
@@ -72,14 +74,20 @@ public class HiLog {
 
         StringBuilder builder = new StringBuilder();
         if (hiLogConfig.includeThread()) {
+            //打印线程信息
             String threadInfo = HiLogConfig.HI_THREAD_FORMAT.format(Thread.currentThread());
             builder.append(threadInfo).append("\n");
         }
         if (hiLogConfig.stackTraceDepth() > 0) {
-            String stackTraceInfo = HiLogConfig.HI_STACK_TRACE_FORMAT.format(new Throwable().getStackTrace());
+            //打印堆栈信息
+            String stackTraceInfo = HiLogConfig.HI_STACK_TRACE_FORMAT.format(
+                    HiStackTraceUtil.getCopyRealStackTrace(
+                            new Throwable().getStackTrace(), packageName,
+                            hiLogConfig.stackTraceDepth()));
+
             builder.append(stackTraceInfo).append("\n");
         }
-        String body = parseBody(content);
+        String body = parseBody(content, hiLogConfig);
         builder.append(body);
         List<HiLogPrinter> printers = hiLogConfig.hiLogPrinters() != null ? Arrays.asList(hiLogConfig.hiLogPrinters()) :
                 HiLogManager.getInstance().getHiLogPrinters();
@@ -87,11 +95,15 @@ public class HiLog {
             return;
         }
         for (HiLogPrinter printer : printers) {
+            //遍历所有的打印器并打印信息
             printer.print(hiLogConfig, type, logTag, builder.toString());
         }
     }
 
-    private static String parseBody(@NonNull Object[] content) {
+    private static String parseBody(@NonNull Object[] content, HiLogConfig config) {
+        if (null != config.injectJson()) {
+            return config.injectJson().toJson(content);
+        }
         StringBuilder sb = new StringBuilder();
         for (Object o : content) {
             sb.append(o.toString()).append(";");

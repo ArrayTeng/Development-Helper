@@ -32,7 +32,7 @@ public class HiLogManager {
         return hiLogManager;
     }
 
-    public void init(@NonNull HiLogConfig hiLogConfig,HiLogPrinter...hiLogPrinters) {
+    public static void init(@NonNull HiLogConfig hiLogConfig,HiLogPrinter...hiLogPrinters) {
         hiLogManager = new HiLogManager(hiLogConfig,hiLogPrinters);
     }
 

@@ -1,7 +1,10 @@
 package com.tengfei.library
 
 import android.app.Application
+import com.google.gson.Gson
+import com.tengfei.hilibrary.hilog.HiConsolePrinter
 import com.tengfei.hilibrary.hilog.HiLogConfig
+import com.tengfei.hilibrary.hilog.HiLogConfig.JsonParse
 import com.tengfei.hilibrary.hilog.HiLogManager
 
 /**
@@ -11,11 +14,16 @@ import com.tengfei.hilibrary.hilog.HiLogManager
  * description
  */
 
-class App : Application(){
+@Suppress("unused")
+class App : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        HiLogManager.instance().init(object:HiLogConfig(){
+        HiLogManager.init(object : HiLogConfig() {
+            override fun injectJson(): JsonParse {
+                return JsonParse { src -> Gson().toJson(src) }
+            }
+
             override fun enable(): Boolean {
                 return true
             }
@@ -23,6 +31,10 @@ class App : Application(){
             override fun global(): String {
                 return "Test"
             }
-        })
+
+            override fun includeThread(): Boolean {
+                return true
+            }
+        }, HiConsolePrinter())
     }
 }
